@@ -1,4 +1,5 @@
 # VS/Rider/MD/Consulo
+/bin/
 /.vs/
 /.vscode/
 ExportedObj/
