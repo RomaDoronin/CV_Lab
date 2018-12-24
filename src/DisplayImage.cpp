@@ -178,6 +178,13 @@ void averageFilter(Mat& Input, Mat& Output)
 
 int main(int argc, char** argv)
 {
+	if (argc < 2)
+	{
+		cout << " Usage: display_image ImageToLoadAndDisplay" << endl;
+		return -1;
+	}
+
+
 	Mat src, /* 1 */
 		src_gray, /* 2 */
 		res_equa, /* 3 */
@@ -194,10 +201,11 @@ int main(int argc, char** argv)
 
 	/* ###################################################################################### */
 	/* 1. Read image from a file - DONE */
-	src = imread("Cat.jpg");
+	src = imread(argv[1]);
 
-	if (!src.data)
+	if (!src.data)                              // Check for invalid input
 	{
+		cout << "Could not open or find the image" << std::endl;
 		return -1;
 	}
 
@@ -232,7 +240,6 @@ int main(int argc, char** argv)
 
 	/* ###################################################################################### */
 	/* 6. Build a distance map - DONE */
-	//distanceTransform(detected_edges, average_res, CV_DIST_L2, 3);
 	namedWindow("Distance Map", 1);
 	createTrackbar("Brightness Threshold", "Distance Map", &edgeThresh, 255, onTrackbar, 0);
 
@@ -242,9 +249,13 @@ int main(int argc, char** argv)
 
 	/* ###################################################################################### */
 	/* 7. Get rid of noise by averaging - DONE */
-	//averageFilter(src, average_res);
 	Mat noise_src, noise_src_gray, noise_detected_edges, noise_average_res;
-	noise_src = imread("Noise.jpg");
+
+	if (argc == 3)
+		noise_src = imread(argv[2]);
+	else
+		noise_src = imread("Noise.jpg");
+
 	DISPLAY_IMG("Source shum image", noise_src);
 	cvtColor(noise_src, noise_src_gray, CV_BGR2GRAY);
 	blur(noise_src_gray, noise_detected_edges, Size(3, 3));
