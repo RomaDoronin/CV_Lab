@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string>
 #include <opencv2/opencv.hpp>
 #include "opencv2/imgproc/types_c.h"
 #include "opencv2/highgui/highgui_c.h"
@@ -16,7 +17,7 @@ int maxCorners = 23;
 int maxTrackbar = 100;
 double qualityLevel = 0.01;
 double minDistance = 10;
-const char* window_src_name = "Source Image";
+const string window_src_name = "Source Image";
 RNG rng(12345);
 
 void goodFeaturesToTrack_Demo(int, void*)
@@ -185,11 +186,11 @@ int main(int argc, char** argv)
 		integral_im /* 7 */
 		;
 	
-	const char* window_res_equa_name = "Equalized Ñontrast";
-	const char* window_src_gray_name = "Source Gray Image";
-	const char* window_dst_name = "Dst Image";
-	const char* window_average_res_name = "average_res Image";
-	const char* window_integral_im_name = "integral_im Image";
+	const string window_res_equa_name = "Equalized Ñontrast";
+	const string window_src_gray_name = "Source Gray Image";
+	const string window_dst_name = "Dst Image";
+	const string window_average_res_name = "average_res Image";
+	const string window_integral_im_name = "integral_im Image";
 
 	/* ###################################################################################### */
 	/* 1. Read image from a file - DONE */
@@ -268,7 +269,7 @@ int main(int argc, char** argv)
 	/* 7. Get rid of noise by averaging - DONE */
 	//averageFilter(src, average_res);
 	Mat noise_src, noise_src_gray, noise_detected_edges, noise_average_res;
-	noise_src = imread("Shum.jpg");
+	noise_src = imread("Noise.jpg");
 	DISPLAY_IMG("Source shum image", noise_src);
 	cvtColor(noise_src, noise_src_gray, CV_BGR2GRAY);
 	blur(noise_src_gray, noise_detected_edges, Size(3, 3));
