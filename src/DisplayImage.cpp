@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <list>
-
 #include <opencv2/opencv.hpp>
 #include "opencv2/imgproc/types_c.h"
 #include "opencv2/highgui/highgui_c.h"
@@ -194,7 +192,7 @@ int main(int argc, char** argv)
 	const char* window_integral_im_name = "integral_im Image";
 
 	/* ###################################################################################### */
-	/* 1. Считать изображение из файла - DONE */
+	/* 1. Read image from a file - DONE */
 	src = imread("Cat.jpg");
 
 	if (!src.data)
@@ -203,15 +201,15 @@ int main(int argc, char** argv)
 	}
 
 	/* ###################################################################################### */
-	/* 2. Перевести изображение в полутоновое - DONE */
+	/* 2. Convert image to grayscale - DONE */
 	cvtColor(src, src_gray, CV_BGR2GRAY);
 
 	/* ###################################################################################### */
-	/* 3. Улучшить контраст - DONE */
+	/* 3. Improve the contrast - DONE */
 	equalizeHist(src_gray, res_equa);
 
 	/* ###################################################################################### */
-	/* 4. Найти краевые точки - DONE */
+	/* 4. Find edge points - DONE */
 	int lowThreshold = 50;
 	const int max_lowThreshold = 100;
 	const int ratio = 3;
@@ -250,14 +248,14 @@ int main(int argc, char** argv)
 
 #ifdef FIVE_AND_SIX
 	/* ###################################################################################### */
-	/* 5. Найти угловые точки - DONE */
+	/* 5. Find corner points - DONE */
 	namedWindow(window_src_name);
 	createTrackbar("Max corners:", window_src_name, &maxCorners, maxTrackbar, goodFeaturesToTrack_Demo);
 	imshow(window_src_name, src);
 	goodFeaturesToTrack_Demo(0, 0);
 
 	/* ###################################################################################### */
-	/* 6. Построить карту растояний - DONE */
+	/* 6. Build a distance map - DONE */
 	//distanceTransform(detected_edges, average_res, CV_DIST_L2, 3);
 	namedWindow("Distance Map", 1);
 	createTrackbar("Brightness Threshold", "Distance Map", &edgeThresh, 255, onTrackbar, 0);
@@ -267,26 +265,26 @@ int main(int argc, char** argv)
 #endif // FIVE_AND_SIX
 
 	/* ###################################################################################### */
-	/* 7. Избавиться от шума усреднением - DONE */
+	/* 7. Get rid of noise by averaging - DONE */
 	//averageFilter(src, average_res);
-	Mat shom_src, shom_src_gray, shom_detected_edges, shom_average_res;
-	shom_src = imread("Shum.jpg");
-	DISPLAY_IMG("Source shum image", shom_src);
-	cvtColor(shom_src, shom_src_gray, CV_BGR2GRAY);
-	blur(shom_src_gray, shom_detected_edges, Size(3, 3));
-	Canny(shom_detected_edges, shom_detected_edges, lowThreshold, lowThreshold * ratio, kernel_size, true);
+	Mat noise_src, noise_src_gray, noise_detected_edges, noise_average_res;
+	noise_src = imread("Shum.jpg");
+	DISPLAY_IMG("Source shum image", noise_src);
+	cvtColor(noise_src, noise_src_gray, CV_BGR2GRAY);
+	blur(noise_src_gray, noise_detected_edges, Size(3, 3));
+	Canny(noise_detected_edges, noise_detected_edges, lowThreshold, lowThreshold * ratio, kernel_size, true);
 
-	shom_detected_edges = Scalar::all(255) - shom_detected_edges;
+	noise_detected_edges = Scalar::all(255) - noise_detected_edges;
 
-	distanceTransform(shom_detected_edges, shom_average_res, CV_DIST_L2, 3);
+	distanceTransform(noise_detected_edges, noise_average_res, CV_DIST_L2, 3);
 
-	Mat result(shom_src_gray.rows, shom_src_gray.cols, shom_src_gray.type());
-	integral(shom_src_gray, integral_im); // Интегральное изображение
+	Mat result(noise_src_gray.rows, noise_src_gray.cols, noise_src_gray.type());
+	integral(noise_src_gray, integral_im); // Integral image
 
 	for (int i = 1; i < integral_im.rows; i++)
 		for (int j = 1; j < integral_im.cols; j++)
 		{
-			int size = 1 * (int)shom_average_res.at<float>(i - 1, j - 1);
+			int size = 1 * (int)noise_average_res.at<float>(i - 1, j - 1);
 			if (size % 2 == 0) size--;
 
 			int i_top = max(i - size / 2, 1);
@@ -303,7 +301,7 @@ int main(int argc, char** argv)
 			result.at<uchar>(i - 1, j - 1) = sum / count;
 		}
 
-	/* Вывод изображений */
+	/* Image output */
 	DISPLAY_IMG("Source", src);
 	DISPLAY_IMG(window_src_gray_name, src_gray);
 	DISPLAY_IMG(window_res_equa_name, res_equa);	
@@ -312,7 +310,7 @@ int main(int argc, char** argv)
 
 	waitKey(0);
 
-	/* Удаление окн */
+	/* Removing Windows */
 	cvDestroyAllWindows();
 
 	return 0;
