@@ -9,15 +9,15 @@ using namespace cv;
 
 #define FIVE_AND_SIX
 
-#define DISPLAY_IMG(win_name, img) namedWindow(win_name, CV_WINDOW_AUTOSIZE); \
-imshow(win_name, img)
+#define DISPLAY_IMG(win, img) namedWindow(win, CV_WINDOW_AUTOSIZE); \
+imshow(win, img)
 
 /* 5 */
 int maxCorners = 23;
 int maxTrackbar = 100;
 double qualityLevel = 0.01;
 double minDistance = 10;
-const string window_src_name = "Source Image";
+const string window_src = "Source Image";
 RNG rng(12345);
 
 void goodFeaturesToTrack_Demo(int, void*)
@@ -60,8 +60,8 @@ void goodFeaturesToTrack_Demo(int, void*)
 	}
 
 	/// Show what you got
-	namedWindow(window_src_name);
-	imshow(window_src_name, copy);
+	namedWindow(window_src);
+	imshow(window_src, copy);
 }
 
 /* 6 */
@@ -183,14 +183,14 @@ int main(int argc, char** argv)
 		res_equa, /* 3 */
 		dst, detected_edges, /* 4 */
 		average_res, /* 6 */
-		integral_im /* 7 */
+		integral_image /* 7 */
 		;
 	
-	const string window_res_equa_name = "Equalized Ñontrast";
-	const string window_src_gray_name = "Source Gray Image";
-	const string window_dst_name = "Dst Image";
-	const string window_average_res_name = "average_res Image";
-	const string window_integral_im_name = "integral_im Image";
+	const string window_res_equa = "Equalized Ñontrast";
+	const string window_src_gray = "Gray Image";
+	const string window_dst = "Dst Image";
+	const string window_average_res = "average_res Image";
+	const string window_integral_image = "integral_image Image";
 
 	/* ###################################################################################### */
 	/* 1. Read image from a file - DONE */
@@ -219,40 +219,15 @@ int main(int argc, char** argv)
 	blur(src_gray, detected_edges, Size(3, 3));
 	Canny(detected_edges, detected_edges, lowThreshold, lowThreshold * ratio, kernel_size/*, true*/);
 
-	//detected_edges = Scalar::all(255) - detected_edges;
 	dst = Scalar::all(0);
 	src.copyTo(dst, detected_edges);
-
-	/*distanceTransform(detected_edges, average_res, CV_DIST_L2, 3);
-
-	Mat result(src_gray.rows, src_gray.cols, src_gray.type());
-	integral(src_gray, integral_im);
-	for (int i = 1; i < integral_im.rows; i++)
-		for (int j = 1; j < integral_im.cols; j++)
-		{
-			int size = 1 * (int)average_res.at<float>(i - 1, j - 1);
-			if (size % 2 == 0) size--;
-
-			int i_top = max(i - size / 2, 1);
-			int i_bot = min(i + size / 2, integral_im.rows - 1);
-			int j_left = max(j - size / 2, 1);
-			int j_right = min(j + size / 2, integral_im.cols - 1);
-
-			int count = (i_bot - i_top + 1)*(j_right - j_left + 1);
-			double sum = integral_im.at<int>(i_bot, j_right)
-				+ integral_im.at<int>(i_top - 1, j_left - 1)
-				- integral_im.at<int>(i_top - 1, j_right)
-				- integral_im.at<int>(i_bot, j_left - 1);
-
-			result.at<uchar>(i - 1, j - 1) = sum / count;
-		}*/
 
 #ifdef FIVE_AND_SIX
 	/* ###################################################################################### */
 	/* 5. Find corner points - DONE */
-	namedWindow(window_src_name);
-	createTrackbar("Max corners:", window_src_name, &maxCorners, maxTrackbar, goodFeaturesToTrack_Demo);
-	imshow(window_src_name, src);
+	namedWindow(window_src);
+	createTrackbar("Max corners:", window_src, &maxCorners, maxTrackbar, goodFeaturesToTrack_Demo);
+	imshow(window_src, src);
 	goodFeaturesToTrack_Demo(0, 0);
 
 	/* ###################################################################################### */
@@ -280,34 +255,32 @@ int main(int argc, char** argv)
 	distanceTransform(noise_detected_edges, noise_average_res, CV_DIST_L2, 3);
 
 	Mat result(noise_src_gray.rows, noise_src_gray.cols, noise_src_gray.type());
-	integral(noise_src_gray, integral_im); // Integral image
+	integral(noise_src_gray, integral_image); // Integral image
 
-	for (int i = 1; i < integral_im.rows; i++)
-		for (int j = 1; j < integral_im.cols; j++)
+	for (int i = 1; i < integral_image.rows; i++)
+		for (int j = 1; j < integral_image.cols; j++)
 		{
 			int size = 1 * (int)noise_average_res.at<float>(i - 1, j - 1);
 			if (size % 2 == 0) size--;
 
-			int i_top = max(i - size / 2, 1);
-			int i_bot = min(i + size / 2, integral_im.rows - 1);
-			int j_left = max(j - size / 2, 1);
-			int j_right = min(j + size / 2, integral_im.cols - 1);
+			int topCount = max(i - size / 2, 1);
+			int botCount = min(i + size / 2, integral_image.rows - 1);
 
-			int count = (i_bot - i_top + 1)*(j_right - j_left + 1);
-			double sum = integral_im.at<int>(i_bot, j_right)
-				+ integral_im.at<int>(i_top - 1, j_left - 1)
-				- integral_im.at<int>(i_top - 1, j_right)
-				- integral_im.at<int>(i_bot, j_left - 1);
+			int leftCount = max(j - size / 2, 1);
+			int rightCount = min(j + size / 2, integral_image.cols - 1);
+
+			int count = (botCount - topCount + 1)*(rightCount - leftCount + 1);
+			double sum = integral_image.at<int>(botCount, rightCount) + integral_image.at<int>(topCount - 1, leftCount - 1) - integral_image.at<int>(topCount - 1, rightCount) - integral_image.at<int>(botCount, leftCount - 1);
 
 			result.at<uchar>(i - 1, j - 1) = sum / count;
 		}
 
 	/* Image output */
 	DISPLAY_IMG("Source", src);
-	DISPLAY_IMG(window_src_gray_name, src_gray);
-	DISPLAY_IMG(window_res_equa_name, res_equa);	
-	DISPLAY_IMG(window_dst_name, dst);
-	DISPLAY_IMG(window_average_res_name, result);
+	DISPLAY_IMG(window_src_gray, src_gray);
+	DISPLAY_IMG(window_res_equa, res_equa);	
+	DISPLAY_IMG(window_dst, dst);
+	DISPLAY_IMG(window_average_res, result);
 
 	waitKey(0);
 
